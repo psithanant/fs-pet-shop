@@ -1,25 +1,9 @@
 /*jshint esversion: 6 */
 'use strict';
-function makePet(age, kind, name) {
-    let pet = {};
-    pet.age = Number(age);
-    pet.kind = kind;
-    pet.name = name;
-    return pet;
-};
-
 let fs = require('fs');
 let path = require('path');
 let petsPath = path.join(__dirname, 'pets.json');
-// path.basename(process.argv[0] --> node
 var node = path.basename(process.argv[0]);
-//path.basename --> only output "pets.js" on Usage: node pets.js
-// prathanasithanant ~/Desktop/galvanize/fs-pet-shop $ node pets.js
-// Usage: node pets.js [read | create | update | destroy
-// prathanasithanant ~/Desktop/galvanize/fs-pet-shop $ node ./pets.js
-// Usage: node pets.js [read | create | update | destroy
-// prathanasithanant ~/Desktop/galvanize/fs-pet-shop $ node ~/Desktop/galvanize/fs-pet-shop/pets.js
-// Usage: node pets.js [read | create | update | destroy
 var file = path.basename(process.argv[1]);
 let cmd = process.argv[2];
 if (cmd === 'read') {
