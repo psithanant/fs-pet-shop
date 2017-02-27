@@ -1,20 +1,39 @@
 /*jshint esversion: 6 */
+let basicAuth = require('basic-auth');
+let auth = function(req, res, next) {
+  function unauthorized(res) {
+    res.set('WWW-Authenticate', 'Basic realm="Required"');
+    return res.sendStatus(401);
+  }
+  let user = basicAuth(req);
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
+  }
+  if (user.name === 'admin' && user.pass === 'meowmix') {
+    return next();
+  } else {
+    return unauthorized(res);
+  }
+};
+
 let fs = require('fs');
 let path = require('path');
 let express = require('express');
-let petsPath = path.join(__dirname, 'pets.json')
+let petsPath = path.join(__dirname, 'pets.json');
 let app = express();
 let port = process.env.PORT || 8000;
 let morgan = require('morgan');
 app.use(morgan('short'));
-let bodyParser = require('body-parser')
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
+let bodyParser = require('body-parser');
+app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
-
+app.use(auth);
 app.disable('x-powered-by');
 
+//check for auth
+// if (user.name === 'admin' && user.pass === 'meowmix') {
 app.get('/pets', function(req, res) {
   fs.readFile(petsPath, function(err, petsJSON) {
     if (err) {
@@ -35,8 +54,8 @@ app.get('/pets/:id', function(req, res) {
     let id = Number.parseInt(req.params.id);
     let pets = JSON.parse(petsJSON);
     if (id < 0 || id >= pets.length || Number.isNaN(id)) {
-      return res.sendStatus(404);
       res.set('Content-Type', 'text/plain');
+      return res.sendStatus(404);
     }
     res.send(pets[id]);
   });
@@ -57,7 +76,7 @@ app.post('/pets', function(req, res) {
       age: newPetAge,
       kind: newPetKind,
       name: newPetName
-    }
+    };
     // console.log(pet);
     if (!req.body.name || !req.body.age || !req.body.kind) {
       return res.sendStatus(400);
@@ -66,7 +85,7 @@ app.post('/pets', function(req, res) {
     let newPetsJSON = JSON.stringify(pets);
     fs.writeFile(petsPath, newPetsJSON, function(err) {
       if (err) {
-        console.error(err)
+        console.error(err);
         return res.sendStatus(500);
       }
       res.set('Content-Type', 'application/json');
@@ -90,7 +109,7 @@ app.patch('/pets/:id', function(req, res) {
     let newPetsJSON = JSON.stringify(pets);
     fs.writeFile(petsPath, newPetsJSON, function(err) {
       if (err) {
-        console.error(err)
+        console.error(err);
         return res.sendStatus(500);
       }
       res.set('Content-Type', 'application/json');
@@ -125,14 +144,15 @@ app.delete('/pets/:id', function(req, res) {
     });
   });
 });
+// }
 
 app.use(function(req, res) {
-  res.sendStatus(404);
   res.set('Content-Type', 'text/plain');
-})
+  res.sendStatus(404);
+});
 
 app.listen(port, function() {
   console.log('Listening on port', port);
-})
+});
 
 module.exports = app;

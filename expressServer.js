@@ -73,18 +73,18 @@ app.post('/pets', function(req, res) {
       }
       res.set('Content-Type', 'application/json');
       res.send(pet);
-
     });
   });
 });
 
 app.use(function(req, res) {
-  res.sendStatus(404);
   res.set('Content-Type', 'text/plain');
+  res.sendStatus(404);
 })
 
 app.listen(port, function() {
   console.log('Listening on port', port);
 })
+
 
 module.exports = app;
